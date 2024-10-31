@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빠르게 잡아주세요!</title>
+    <style>
+                @font-face {
+    font-family: 'YOnepickTTF-Bold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2410-1@1.0/YOnepickTTF-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;}
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100vh;
+            background-color: #ffffff;
+            margin: 0;
+            overflow: hidden; /* 화면 전체는 스크롤 없음 */
+        
+        }
+#timer {
+            margin: auto;
+            color: #000000;
+            font-size: 20px;
+        }
+
+
+
+        .back-button {
+            position: absolute; /* position absolute to place the button in the top-left corner */
+            top: 20px;
+            left: 20px;
+            background-color: #ffffff;
+            color: black;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .back-button:hover {
+            background-color: lightgray; /* darker shade on hover */
+        }
+
+        .display {
+            width: calc(100% - 500px); /* 양 옆 마진 100px */
+            text-align: center;
+            font-size: 5vw; /* 윗 공간의 절반 크기 */
+            color: white;
+            background-color: #333333;
+            padding: 20px 0;
+            box-sizing: border-box;
+            min-height: 50px; /* 기본 텍스트 영역 */
+        }
+
+        .number-display {
+            position: absolute; /* 숫자 위치 조정 */
+            top: 20px; /* 화면 상단에서 위치 */
+            left: 50%; /* 중앙 정렬 */
+            transform: translateX(-50%); /* 중앙으로 이동 */
+            font-size: 48px; /* 숫자 크기 */
+            color: #000000; /* 숫자 색상 */
+        }
+
+
+        .image-container {
+            display: flex;
+            flex-wrap: wrap; /* 줄 바꿈 */
+            justify-content: center; /* 중앙 정렬 */
+            margin-top: 80px; /* 숫자 아래 여백 */
+            position: absolute;
+            top: 80px; /* 숫자 아래 위치 */
+            left: 50%;
+            transform: translateX(-50%); /* 중앙으로 이동 */
+            max-width: 100%; /* 최대 너비 */
+        }
+
+        .image-container img {
+            width: 80px; /* 이미지 크기 조절 */
+            height: auto; /* 비율 유지 */
+            margin: 5px; /* 이미지 사이 여백 */
+        }
+
+
+        .keyboard {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #ffffff;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .key {
+            background-color: #ffffff;
+            border: 1px solid #4d4d4d;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            height: 80px;
+            transition: all 0.2s ease;
+            position: relative; /* 자식 요소에 대해 상대적으로 배치 */
+        }
+
+        .key::after {
+            content: ''; /* 줄을 표시하기 위한 가상 요소 */
+            position: absolute;
+            width: 20px;
+            height: 3px;
+            background-color: gray;
+            left: 50%; /* 수평 중앙 정렬 */
+            transform: translateX(-50%); /* 중앙으로 이동 */
+            top: 70px; /* 세로 위치 조정 */
+            display: none; /* 기본적으로 숨김 */
+            border-radius: 15%;
+        }
+
+        .key[data-keycode="70"]::after, /* F 키에 줄 */
+        .key[data-keycode="74"]::after { /* J 키에 줄 */
+            display: block; /* 줄 보이기 */
+        }
+
+        .shift {
+            width: 190px;
+        }
+
+        .space-bar {
+            width: 445px;
+        }
+
+        .delete {
+            width: 120px;
+        }
+
+        .enter {
+            width: 145px;
+        }
+
+        .key-short {
+            width: 80px;
+        }
+
+        .command {
+            width: 100px;
+        }
+
+        .arrow-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 0px; /* 화살표 키 사이의 간격 */
+        }
+
+        .arrow {
+            height: 39px; 
+        }
+
+        .black {
+            width: 80px;
+            height: 40px;
+        }
+        
+        .active {
+            background-color: red;
+            transform: scale(0.5);
+        }
+
+
+        .excluded{
+
+        }
+        @keyframes redLightAnimation {
+            from { background-color: rgba(255, 0, 0, 0.1); }
+            to { background-color: rgba(255, 0, 0, 1); }
+        }
+    
+    </style>
+</head>
+<body>
+        <div id="timer">0.0</div>
+
+    <button class="back-button" onclick="window.location='../a/index.html'">←</button>
+        <div class="number-display" id="numberDisplay">0</div> <!-- 숫자를 표시할 요소 추가 -->
+        <div class="image-container" id="imageContainer"></div> <!-- 이미지 표시할 요소 추가 -->
+
+    <div class="display-container">
+        <div class="" id="display"></div>
+    </div>
+    <div class="keyboard">
+        
+        <div class="row">
+            <div class="key key-short" data-keycode="192"></div>
+            <div class="key key-short" data-keycode="49"></div>
+            <div class="key key-short" data-keycode="50"></div>
+            <div class="key key-short" data-keycode="51"></div>
+            <div class="key key-short" data-keycode="52"></div>
+            <div class="key key-short" data-keycode="53"></div>
+            <div class="key key-short" data-keycode="54"></div>
+            <div class="key key-short" data-keycode="55"></div>
+            <div class="key key-short" data-keycode="56"></div>
+            <div class="key key-short" data-keycode="57"></div>
+            <div class="key key-short" data-keycode="48"></div>
+            <div class="key key-short" data-keycode="189"></div>
+            <div class="key key-short" data-keycode="187"></div>
+            <div class="key delete excluded" data-keycode="8"></div>
+        </div>
+        
+        <div class="row">
+            <div class="key delete excluded" data-keycode="9"></div>
+            <div class="key key-short" data-keycode="81"></div>
+            <div class="key key-short" data-keycode="87"></div>
+            <div class="key key-short" data-keycode="69"></div>
+            <div class="key key-short" data-keycode="82"></div>
+            <div class="key key-short" data-keycode="84"></div>
+            <div class="key key-short" data-keycode="89"></div>
+            <div class="key key-short" data-keycode="85"></div>
+            <div class="key key-short" data-keycode="73"></div>
+            <div class="key key-short" data-keycode="79"></div>
+            <div class="key key-short" data-keycode="80"></div>
+            <div class="key key-short" data-keycode="219"></div>
+            <div class="key key-short" data-keycode="221"></div>
+            <div class="key key-short" data-keycode="220"></div>
+        </div>
+        
+        <div class="row">
+            <div class="key enter excluded" data-keycode="20"></div>
+            <div class="key key-short" data-keycode="65"></div>
+            <div class="key key-short" data-keycode="83"></div>
+            <div class="key key-short" data-keycode="68"></div>
+            <div class="key key-short" data-keycode="70"></div>
+            <div class="key key-short" data-keycode="71"></div>
+            <div class="key key-short" data-keycode="72"></div>
+            <div class="key key-short" data-keycode="74"></div>
+            <div class="key key-short" data-keycode="75"></div>
+            <div class="key key-short" data-keycode="76"></div>
+            <div class="key key-short" data-keycode="186"></div>
+            <div class="key key-short" data-keycode="222"></div>
+            <div class="key enter excluded" data-keycode="13"></div>
+        </div>
+        
+        <div class="row">
+            <div class="key shift excluded" data-keycode="16"></div>
+            <div class="key key-short" data-keycode="90"></div>
+            <div class="key key-short" data-keycode="88"></div>
+            <div class="key key-short" data-keycode="67"></div>
+            <div class="key key-short" data-keycode="86"></div>
+            <div class="key key-short" data-keycode="66"></div>
+            <div class="key key-short" data-keycode="78"></div>
+            <div class="key key-short" data-keycode="77"></div>
+            <div class="key key-short" data-keycode="188"></div>
+            <div class="key key-short" data-keycode="190"></div>
+            <div class="key key-short" data-keycode="191"></div>
+            <div class="key shift excluded" data-keycode="16"></div>
+        </div>
+        <div class="row">
+            <div class="key key-short excluded" data-keycode="112"></div>
+            <div class="key key-short excluded" data-keycode="17"></div>
+            <div class="key key-short excluded" data-keycode="18"></div>
+            <div class="key command excluded" data-keycode="91"></div>
+            <div class="key space-bar excluded" data-keycode="32"></div>
+            <div class="key command excluded" data-keycode="91"></div>
+            <div class="key key-short excluded" data-keycode="18"></div>
+            <div class="arrow-vertical">
+                <div class="black"></div>
+                <div class="key key-short arrow excluded" 
+                data-keycode="37"></div>
+
+            </div>
+            
+            <div class=" arrow-vertical">
+                <div class="key key-short arrow excluded" data-keycode="38"></div>
+                <div class="key key-short arrow excluded" data-keycode="40"></div>
+            </div>
+            <div class="arrow-vertical">
+                <div class="black"></div>
+            <div class="key key-short arrow excluded" data-keycode="39"></div>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 0; // 타이머가 시작되면 0.0초부터 시작
+        const timerDisplay = document.getElementById('timer');
+
+        const timerInterval = setInterval(() => {
+            timeLeft += 0.1;
+            timerDisplay.textContent = timeLeft.toFixed(1);
+            if (timeLeft >= 10) { // 원하는 타이머 시간이 끝났을 때
+                clearInterval(timerInterval);
+                // 프레스 카운트 숫자에 따라 메시지 표시
+        if (pressCount < 9) {
+            alert('그냥 마라탕이나 사주세요 선배..');
+        } else {
+            alert('멋져요 선배.. 저랑 사귀어줄래요..?');
+        }
+            }
+        }, 100);
+
+
+
+
+
+
+
+        const display = document.getElementById('display');
+        const numberDisplay = document.getElementById('numberDisplay'); // 숫자 표시 요소
+        let typedText = '';
+        let pressCount = 0; // 누른 키의 수 카운트
+
+        document.addEventListener('keydown', (event) => {
+            const keycode = event.keyCode;
+            const key = event.key;
+
+
+    
+
+            document.querySelectorAll('.key').forEach(k => {
+                if (k.getAttribute('data-keycode') == keycode) {
+                    k.classList.add('active');
+                }
+            });
+        });
+
+        document.addEventListener('keyup', (event) => {
+            const keycode = event.keyCode;
+            document.querySelectorAll('.key').forEach(k => {
+                if (k.getAttribute('data-keycode') == keycode) {
+                    k.classList.remove('active');
+                }
+            });
+        });
+
+
+
+let activeKeys = 0;
+const maxActiveKeys = 1; // 최대 활성화 키 수
+
+function lightUpRandomKey() {
+    if (activeKeys >= maxActiveKeys) return;
+    const keys = Array.from(document.querySelectorAll('.key:not(.excluded)')); // 제외할 키를 필터링
+    const randomKey = keys[Math.floor(Math.random() * keys.length)];
+
+ // 랜덤 키에 img1 추가
+    if (!randomKey.querySelector('.light-image')) {
+        const bug1 = document.createElement('img');
+        bug1.src = 'bug1.png';
+        bug1.className = 'light-image'; // 클래스 추가
+        bug1.style.position = 'absolute';
+        bug1.style.top = '0';
+        bug1.style.left = '0';
+        bug1.style.width = '100%'; // 키에 맞게 조절
+        bug1.style.height = '100%';
+        bug1.style.pointerEvents = 'none'; // 이미지에 마우스 이벤트가 가지 않도록 설정
+        randomKey.appendChild(bug1); // 키에 img1 추가
+        activeKeys++;
+
+        // 키 입력 이벤트 추가
+        document.addEventListener('keydown', function handleKeyPress(event) {
+            const keyPressed = event.keyCode; // 눌린 키의 키코드
+
+            // 이미지가 있는 모든 키에 대해 검사
+            keys.forEach(key => {
+                if (key.querySelector('.light-image') && keyPressed == key.dataset.keycode) {
+                    key.innerHTML = ''; // 모든 자식 요소 제거 (이미지 삭제)
+                    activeKeys--; // 키 활성화 수 감소
+                    pressCount++; // 누른 키 수 증가
+                    numberDisplay.textContent = pressCount; // 숫자 업데이트
+
+                    const newImage = document.createElement('img');
+                newImage.src = 'bug2.png';
+                imageContainer.appendChild(newImage);
+
+                // 이미지가 10개를 초과하면 다음 줄로 이동
+                if (imageContainer.childElementCount > 10) {
+                    const newRow = document.createElement('div');
+                    newRow.style.display = 'flex'; // 새로운 행은 flexbox로 정렬
+                    newRow.style.justifyContent = 'center'; // 중앙 정렬
+                    imageContainer.appendChild(newRow);
+                }
+
+                }
+            });
+        });
+    }
+}
+
+
+// 랜덤 키를 활성화하는 예시 (예: 1초마다)
+setInterval(lightUpRandomKey, 100); // 1초마다 랜덤 키 활성화
+
+
+
+    </script>
+</body>
+</html>
